@@ -808,16 +808,13 @@ auth.onAuthStateChanged(user => {
     loadEntries();
 
   // Add Logout button dynamically if not already added
-  if (!document.getElementById('logoutBtn')) {
-    const logoutBtn = document.createElement('button');
-    logoutBtn.id = 'logoutBtn';
-    logoutBtn.textContent = 'Logout';
-    logoutBtn.style.cssText = 'position:absolute; top:20px; right:20px;';
-    document.querySelector('header')?.appendChild(logoutBtn);
-  }
-
+  auth.onAuthStateChanged(user => {
+  if (user) {
+    loadEntries();
+    if (!document.getElementById('logoutBtn')) {
+      setupLogoutButton();
+    }
   } else {
-    // Not logged in → show login button
     document.body.innerHTML = `
       <div style="text-align:center; margin-top:50px;">
         <h2>Please sign in to access Networth Tracker</h2>
@@ -830,6 +827,7 @@ auth.onAuthStateChanged(user => {
     });
   }
 });
+
 
 
 let entries = [];
@@ -1263,14 +1261,20 @@ document.addEventListener('DOMContentLoaded', () => {
   await db.ref("entries").set(entries);
 }
 // Logout handler
-  document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'logoutBtn') {
-      firebase.auth().signOut().then(() => {
-        console.log("User signed out");
-        location.reload(); // back to login screen
-      });
-    }
-});
+function setupLogoutButton() {
+  const logoutBtn = document.createElement('button');
+  logoutBtn.id = 'logoutBtn';
+  logoutBtn.textContent = 'Logout';
+  logoutBtn.style.cssText = 'position:absolute; top:20px; right:20px;';
+  logoutBtn.addEventListener('click', () => {
+    firebase.auth().signOut().then(() => {
+      console.log("User signed out");
+      location.reload(); // back to login screen
+    });
+  });
+  document.querySelector('header')?.appendChild(logoutBtn);
+}
+
 
   </script>
 </body>
