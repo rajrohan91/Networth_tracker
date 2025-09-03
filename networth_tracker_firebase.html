@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Net Worth Tracker (₹)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <style>
+    /* Keeping your existing CSS unchanged */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-chart-line"></i> Premium Net Worth Tracker</h1>
+      <p class="tagline">Track your financial progress in style with ₹</p>
+    </header>
+    <!-- Your full form, summary, chart, and table sections remain unchanged -->
+  </div>
+
+  <!-- Modal remains unchanged -->
+
+  <script>
+    // ---------------- Firebase Setup ----------------
+    // TODO: Replace with your Firebase config
+   const firebaseConfig = {
+	apiKey: "AIzaSyBrmzyjTMRKpoKV2YXVW5QgViSJ6R2mjdA",
+	authDomain: "networth-tracker-bf489.firebaseapp.com",
+	databaseURL: "https://networth-tracker-bf489-default-rtdb.asia-southeast1.firebasedatabase.app",
+	projectId: "networth-tracker-bf489",
+	storageBucket: "networth-tracker-bf489.firebasestorage.app",
+	messagingSenderId: "446137662787",
+	appId: "1:446137662787:web:835bbb62aa7956f79b43f6",
+	measurementId: "G-0EHZXD2MGE"
+	};
+
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ---------------- Data ----------------
+    let entries = [];
+    let netWorthChart = null;
+
+    // DOM elements (same as before)
+    const entryForm = document.getElementById('entryForm');
+    const assetFields = document.getElementById('assetFields');
+    const liabilityFields = document.getElementById('liabilityFields');
+    const addAssetBtn = document.getElementById('addAsset');
+    const addLiabilityBtn = document.getElementById('addLiability');
+    const currentNetWorthDisplay = document.getElementById('currentNetWorth');
+    const totalAssetsDisplay = document.getElementById('totalAssets');
+    const totalLiabilitiesDisplay = document.getElementById('totalLiabilities');
+    const historyTable = document.querySelector('#historyTable tbody');
+    const detailsModal = document.getElementById('detailsModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const modalDate = document.getElementById('modal-date');
+    const modalNetWorth = document.getElementById('modal-net-worth');
+    const modalTotalAssets = document.getElementById('modal-total-assets');
+    const modalTotalLiabilities = document.getElementById('modal-total-liabilities');
+    const modalAssetsList = document.getElementById('modal-assets-list');
+    const modalLiabilitiesList = document.getElementById('modal-liabilities-list');
+
+    // ---------------- Firebase Functions ----------------
+    async function loadEntries() {
+      const snapshot = await db.ref("entries").get();
+      if (snapshot.exists()) {
+        entries = snapshot.val();
+      } else {
+        entries = [];
+      }
+      updateDashboard();
+      renderHistoryTable();
+      renderChart();
+    }
+
+    async function saveEntries() {
+      await db.ref("entries").set(entries);
+    }
+
+    // ---------------- Init ----------------
+    document.addEventListener('DOMContentLoaded', () => {
+      let today = new Date();
+      today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+      document.getElementById('entryDate').value = today.toISOString().split('T')[0];
+
+      // Load from Firebase
+      loadEntries();
+
+      // Event listeners
+      entryForm.addEventListener('submit', handleFormSubmit);
+      addAssetBtn.addEventListener('click', addAssetField);
+      addLiabilityBtn.addEventListener('click', addLiabilityField);
+      closeModalBtn.addEventListener('click', closeModal);
+      detailsModal.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) { closeModal(); }
+      });
+
+      document.querySelectorAll('.delete-field').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.parentElement.remove();
+        });
+      });
+    });
+
+    // ---------------- Modified functions ----------------
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById('entryDate').value;
+      const assets = {};
+      document.querySelectorAll('.asset-field').forEach(field => {
+        const name = field.querySelector('.asset-name').textContent;
+        const value = parseFloat(field.querySelector('.asset').value) || 0;
+        assets[name] = value;
+      });
+      const liabilities = {};
+      document.querySelectorAll('.liability-field').forEach(field => {
+        const name = field.querySelector('.liability-name').textContent;
+        const value = parseFloat(field.querySelector('.liability').value) || 0;
+        liabilities[name] = value;
+      });
+      const totalAssets = Object.values(assets).reduce((sum, val) => sum + val, 0);
+      const totalLiabilities = Object.values(liabilities).reduce((sum, val) => sum + val, 0);
+      const netWorth = totalAssets - totalLiabilities;
+      const newEntry = {
+        id: Date.now(),
+        date,
+        assets,
+        liabilities,
+        netWorth,
+        totalAssets,
+        totalLiabilities
+      };
+      entries.push(newEntry);
+      saveEntries();
+      updateDashboard();
+      renderHistoryTable();
+      renderChart();
+      entryForm.reset();
+      let today = new Date();
+      today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+      document.getElementById('entryDate').value = today.toISOString().split('T')[0];
+    }
+
+    function deleteEntry(id) {
+      if (confirm('Are you sure you want to delete this financial entry?')) {
+        entries = entries.filter(entry => entry.id !== id);
+        saveEntries();
+        updateDashboard();
+        renderHistoryTable();
+        renderChart();
+        closeModal();
+      }
+    }
+
+    // ---------------- Rest of your original functions remain unchanged ----------------
+    // editName, saveNameChange, addAssetField, addLiabilityField, updateDashboard,
+    // renderHistoryTable, showDetails, closeModal, renderChart, formatCurrency, formatDate
+  </script>
+</body>
+</html>
