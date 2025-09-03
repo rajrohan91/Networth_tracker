@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium Net Worth Tracker (₹)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* Force consistent font styles across browsers */
@@ -773,20 +774,53 @@
   <script>
     // Data storage
     // Firebase Setup
+
 const firebaseConfig = {
-   apiKey: "AIzaSyBrmzyjTMRKpoKV2YXVW5QgViSJ6R2mjdA",
-   authDomain: "networth-tracker-bf489.firebaseapp.com",
-   databaseURL: "https://networth-tracker-bf489-default-rtdb.asia-southeast1.firebasedatabase.app",
-   projectId: "networth-tracker-bf489",
-   storageBucket: "networth-tracker-bf489.firebasestorage.app",
-   messagingSenderId: "446137662787",
-   appId: "1:446137662787:web:835bbb62aa7956f79b43f6",
-   measurementId: "G-0EHZXD2MGE"
-   };
+
+  apiKey: "AIzaSyBrmzyjTMRKpoKV2YXVW5QgViSJ6R2mjdA",
+
+  authDomain: "networth-tracker-bf489.firebaseapp.com",
+
+  databaseURL: "https://networth-tracker-bf489-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId: "networth-tracker-bf489",
+
+  storageBucket: "networth-tracker-bf489.firebasestorage.app",
+
+  messagingSenderId: "446137662787",
+
+  appId: "1:446137662787:web:835bbb62aa7956f79b43f6",
+
+  measurementId: "G-0EHZXD2MGE"
+
+};
 
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+const auth = firebase.auth();
+
+// Require login before loading
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // Logged in → load entries
+    loadEntries();
+  } else {
+    // Not logged in → show login button
+    document.body.innerHTML = `
+      <div style="text-align:center; margin-top:50px;">
+        <h2>Please sign in to access Networth Tracker</h2>
+        <button id="loginBtn">Sign in with Google</button>
+      </div>
+    `;
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    });
+  }
+});
+
 
 let entries = [];
 
