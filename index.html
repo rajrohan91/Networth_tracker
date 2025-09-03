@@ -84,6 +84,112 @@
       position: relative;
       z-index: 2;
     }
+
+    /* User info and logout styles */
+    .user-info {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 3;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .user-name {
+      color: white;
+      font-weight: 500;
+      display: none; /* Hide on mobile by default */
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2) !important;
+      color: white !important;
+      border: 1px solid rgba(255,255,255,0.3) !important;
+      padding: 8px 16px !important;
+      border-radius: 20px !important;
+      font-size: 0.9rem !important;
+      transition: all 0.3s ease !important;
+      box-shadow: none !important;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Login screen styles */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+    }
+
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-title {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .login-subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .google-login-btn {
+      background: #4285f4 !important;
+      color: white !important;
+      border: none !important;
+      padding: 12px 24px !important;
+      border-radius: 8px !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      width: 100%;
+      transition: all 0.3s ease !important;
+      box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3) !important;
+    }
+
+    .google-login-btn:hover {
+      background: #3367d6 !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 15px rgba(66, 133, 244, 0.4) !important;
+    }
+
+    .google-icon {
+      background: white;
+      padding: 4px;
+      border-radius: 2px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     
     .content-grid {
       display: grid;
@@ -584,6 +690,17 @@
       .modal-summary {
         grid-template-columns: 1fr;
       }
+
+      .user-info {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .user-name {
+        display: block;
+        font-size: 0.8rem;
+      }
     }
     
     @media (max-width: 600px) {
@@ -594,12 +711,34 @@
       .modal-summary {
         grid-template-columns: 1fr;
       }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+      }
+
+      .user-info {
+        position: static;
+        justify-content: center;
+        margin-top: 15px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="appContainer" style="display: none;">
     <header>
+      <div class="user-info" id="userInfo">
+        <img class="user-avatar" id="userAvatar" src="" alt="User Avatar">
+        <span class="user-name" id="userName"></span>
+        <button class="logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
       <h1><i class="fas fa-chart-line"></i> Premium Net Worth Tracker</h1>
       <p class="tagline">Track your financial progress in style with ₹</p>
     </header>
@@ -720,6 +859,28 @@
       </div>
     </div>
   </div>
+
+  <!-- Login Screen -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-card">
+      <h1 class="login-title">
+        <i class="fas fa-chart-line" style="color: var(--primary); margin-right: 10px;"></i>
+        Welcome Back
+      </h1>
+      <p class="login-subtitle">Sign in to access your Net Worth Tracker</p>
+      <button class="google-login-btn" id="loginBtn">
+        <div class="google-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+            <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.53H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+            <path fill="#FBBC05" d="M4.5 10.49a4.8 4.8 0 0 1 0-3.07V5.35H1.83a8 8 0 0 0 0 7.28l2.67-2.14z"/>
+            <path fill="#EA4335" d="M8.98 4.72c1.16 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.35L4.5 7.42c.45-1.33 1.7-2.7 4.48-2.7z"/>
+          </svg>
+        </div>
+        Continue with Google
+      </button>
+    </div>
+  </div>
   
   <!-- Modal for Detailed View -->
   <div class="modal-overlay" id="detailsModal">
@@ -772,69 +933,36 @@
   </div>
 
   <script>
-    // Data storage
     // Firebase Setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyBrmzyjTMRKpoKV2YXVW5QgViSJ6R2mjdA",
+      authDomain: "networth-tracker-bf489.firebaseapp.com",
+      databaseURL: "https://networth-tracker-bf489-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "networth-tracker-bf489",
+      storageBucket: "networth-tracker-bf489.firebasestorage.app",
+      messagingSenderId: "446137662787",
+      appId: "1:446137662787:web:835bbb62aa7956f79b43f6",
+      measurementId: "G-0EHZXD2MGE"
+    };
 
-const firebaseConfig = {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
 
-  apiKey: "AIzaSyBrmzyjTMRKpoKV2YXVW5QgViSJ6R2mjdA",
-
-  authDomain: "networth-tracker-bf489.firebaseapp.com",
-
-  databaseURL: "https://networth-tracker-bf489-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-  projectId: "networth-tracker-bf489",
-
-  storageBucket: "networth-tracker-bf489.firebasestorage.app",
-
-  messagingSenderId: "446137662787",
-
-  appId: "1:446137662787:web:835bbb62aa7956f79b43f6",
-
-  measurementId: "G-0EHZXD2MGE"
-
-};
-
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const auth = firebase.auth();
-
-// Require login before loading
-auth.onAuthStateChanged(user => {
-  if (user) {
-    // Logged in → load entries
-    loadEntries();
-
-  // Add Logout button dynamically if not already added
-  auth.onAuthStateChanged(user => {
-  if (user) {
-    loadEntries();
-    if (!document.getElementById('logoutBtn')) {
-      setupLogoutButton();
-    }
-  } else {
-    document.body.innerHTML = `
-      <div style="text-align:center; margin-top:50px;">
-        <h2>Please sign in to access Networth Tracker</h2>
-        <button id="loginBtn">Sign in with Google</button>
-      </div>
-    `;
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider);
-    });
-  }
-});
-
-
-
-let entries = [];
-
+    // Global variables
+    let entries = [];
     let netWorthChart = null;
+    let currentUser = null;
 
     // DOM elements
+    const appContainer = document.getElementById('appContainer');
+    const loginContainer = document.getElementById('loginContainer');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userInfo = document.getElementById('userInfo');
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    
     const entryForm = document.getElementById('entryForm');
     const assetFields = document.getElementById('assetFields');
     const liabilityFields = document.getElementById('liabilityFields');
@@ -853,30 +981,113 @@ let entries = [];
     const modalAssetsList = document.getElementById('modal-assets-list');
     const modalLiabilitiesList = document.getElementById('modal-liabilities-list');
 
-    // Load entries from Firebase
-async function loadEntries() {
-  const snapshot = await db.ref("entries").get();
-  if (snapshot.exists()) {
-    entries = snapshot.val() || [];
-  } else {
-    entries = [];
-  }
-  updateDashboard();
-  renderHistoryTable();
-  renderChart();
-}
+    // Authentication state observer
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        showApp();
+        updateUserInfo(user);
+        loadEntries();
+      } else {
+        currentUser = null;
+        showLogin();
+      }
+    });
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+    // Show app interface
+    function showApp() {
+      appContainer.style.display = 'block';
+      loginContainer.style.display = 'none';
+    }
+
+    // Show login interface
+    function showLogin() {
+      appContainer.style.display = 'none';
+      loginContainer.style.display = 'flex';
+    }
+
+    // Update user info in header
+    function updateUserInfo(user) {
+      if (user.photoURL) {
+        userAvatar.src = user.photoURL;
+        userAvatar.alt = user.displayName || 'User';
+      }
+      
+      if (user.displayName) {
+        userName.textContent = user.displayName;
+      }
+    }
+
+    // Login with Google
+    loginBtn.addEventListener('click', async () => {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        // Clear local data
+        entries = [];
+        if (netWorthChart) {
+          netWorthChart.destroy();
+          netWorthChart = null;
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Logout failed. Please try again.');
+      }
+    });
+
+    // Load entries from Firebase
+    async function loadEntries() {
+      if (!currentUser) return;
+      
+      try {
+        const snapshot = await db.ref(`users/${currentUser.uid}/entries`).get();
+        if (snapshot.exists()) {
+          entries = Object.values(snapshot.val()) || [];
+        } else {
+          entries = [];
+        }
+        updateDashboard();
+        renderHistoryTable();
+        renderChart();
+      } catch (error) {
+        console.error('Error loading entries:', error);
+      }
+    }
+
+    // Save entries to Firebase
+    async function saveEntries() {
+      if (!currentUser) return;
+      
+      try {
+        // Convert array to object with entry IDs as keys
+        const entriesObject = {};
+        entries.forEach(entry => {
+          entriesObject[entry.id] = entry;
+        });
+        
+        await db.ref(`users/${currentUser.uid}/entries`).set(entriesObject);
+      } catch (error) {
+        console.error('Error saving entries:', error);
+        alert('Failed to save data. Please try again.');
+      }
+    }
+
+    // Initialize app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
       // Set default date to today
       let today = new Date();
       today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
       document.getElementById('entryDate').value = today.toISOString().split('T')[0];
-      
-      // Load from Firebase\n      loadEntries();
-      updateDashboard();
-      renderHistoryTable();
-      renderChart();
       
       // Set up event listeners
       entryForm.addEventListener('submit', handleFormSubmit);
@@ -884,7 +1095,9 @@ document.addEventListener('DOMContentLoaded', () => {
       addLiabilityBtn.addEventListener('click', addLiabilityField);
       closeModalBtn.addEventListener('click', closeModal);
       detailsModal.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal-overlay')) { closeModal(); }
+        if (e.target.classList.contains('modal-overlay')) { 
+          closeModal(); 
+        }
       });
       
       // Add delete functionality to initial fields
@@ -1256,26 +1469,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
       return new Date(dateString).toLocaleDateString('en-US', options);
     }
-
-    async function saveEntries() {
-  await db.ref("entries").set(entries);
-}
-// Logout handler
-function setupLogoutButton() {
-  const logoutBtn = document.createElement('button');
-  logoutBtn.id = 'logoutBtn';
-  logoutBtn.textContent = 'Logout';
-  logoutBtn.style.cssText = 'position:absolute; top:20px; right:20px;';
-  logoutBtn.addEventListener('click', () => {
-    firebase.auth().signOut().then(() => {
-      console.log("User signed out");
-      location.reload(); // back to login screen
-    });
-  });
-  document.querySelector('header')?.appendChild(logoutBtn);
-}
-
-
   </script>
 </body>
 </html>
