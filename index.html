@@ -19,6 +19,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      color: #fff;
     }
 
     .login-container {
@@ -103,6 +104,150 @@
     #appContainer {
       display: none;
     }
+
+    /* ===== Dashboard Fancy Styling ===== */
+    body.logged-in {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      display: block;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: linear-gradient(90deg, #3a0ca3, #7209b7);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #userAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    }
+
+    #logoutBtn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #f72585, #7209b7);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #logoutBtn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px #f72585;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-around;
+      margin: 30px auto;
+      max-width: 1000px;
+      gap: 20px;
+    }
+    .summary .card {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      transition: transform 0.3s;
+    }
+    .summary .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .form-section {
+      background: rgba(255,255,255,0.05);
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 800px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .form-section input {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      width: 100%;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+    .form-section button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      background: linear-gradient(90deg, #4cc9f0, #4361ee);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .form-section button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #4cc9f0;
+    }
+
+    .history {
+      max-width: 800px;
+      margin: 30px auto;
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    #historyTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #historyTable th, #historyTable td {
+      padding: 12px;
+      text-align: center;
+    }
+    #historyTable tbody tr:nth-child(even) {
+      background: rgba(255,255,255,0.07);
+    }
+    #historyTable button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 12px;
+      background: #f72585;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #historyTable button:hover {
+      background: #b5179e;
+    }
+
+    .chart-section {
+      max-width: 900px;
+      margin: 30px auto;
+      background: rgba(255,255,255,0.08);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -128,7 +273,6 @@
 
   <!-- Main App (hidden until login) -->
   <div id="appContainer">
-    <!-- RESTORED ORIGINAL TRACKER DASHBOARD -->
     <header>
       <div class="user-info">
         <img id="userAvatar" src="" alt="User Avatar">
@@ -211,10 +355,12 @@
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
+        document.body.classList.add('logged-in');
         showApp();
         listenForEntries();
       } else {
         currentUser = null;
+        document.body.classList.remove('logged-in');
         showLogin();
       }
     });
@@ -311,56 +457,4 @@
     function renderChart() {
       const ctx = document.getElementById('netWorthChart').getContext('2d');
       if (netWorthChart) netWorthChart.destroy();
-      netWorthChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: entries.map(e => e.date),
-          datasets: [{
-            label: 'Net Worth',
-            data: entries.map(e => e.netWorth),
-            borderColor: '#3a0ca3',
-            fill: false
-          }]
-        }
-      });
-    }
-
-    const entryForm = document.getElementById('entryForm');
-    const addAssetBtn = document.getElementById('addAsset');
-    const addLiabilityBtn = document.getElementById('addLiability');
-
-    entryForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const date = document.getElementById('entryDate').value;
-      const assets = {};
-      document.querySelectorAll('.asset').forEach((input, i) => {
-        assets[`Asset${i+1}`] = parseFloat(input.value) || 0;
-      });
-      const liabilities = {};
-      document.querySelectorAll('.liability').forEach((input, i) => {
-        liabilities[`Liability${i+1}`] = parseFloat(input.value) || 0;
-      });
-      const totalAssets = Object.values(assets).reduce((a,b) => a+b, 0);
-      const totalLiabilities = Object.values(liabilities).reduce((a,b) => a+b, 0);
-      const netWorth = totalAssets - totalLiabilities;
-      const newEntry = { date, assets, liabilities, totalAssets, totalLiabilities, netWorth };
-      saveEntry(newEntry);
-      entryForm.reset();
-    });
-
-    addAssetBtn.addEventListener('click', () => {
-      const div = document.createElement('div');
-      div.classList.add('asset-field');
-      div.innerHTML = `Asset: <input type="number" class="asset" value="0">`;
-      document.getElementById('assetFields').appendChild(div);
-    });
-
-    addLiabilityBtn.addEventListener('click', () => {
-      const div = document.createElement('div');
-      div.classList.add('liability-field');
-      div.innerHTML = `Liability: <input type="number" class="liability" value="0">`;
-      document.getElementById('liabilityFields').appendChild(div);
-    });
-  </script>
-</body>
-</html>
+      netWorthChart
