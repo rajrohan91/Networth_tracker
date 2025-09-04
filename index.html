@@ -102,6 +102,11 @@
     /* Hide the app until login */
     #appContainer {
       display: none;
+      padding: 20px;
+      background: #f4f6f9;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
     }
   </style>
 </head>
@@ -128,7 +133,41 @@
 
   <!-- Main App (hidden until login) -->
   <div id="appContainer">
-    <!-- (Your dashboard and app content here) -->
+    <header>
+      <h2>Net Worth Tracker</h2>
+      <button id="logoutBtn">Logout</button>
+    </header>
+
+    <section id="summary">
+      <div>Net Worth: <span id="currentNetWorth">₹0</span></div>
+      <div>Total Assets: <span id="totalAssets">₹0</span></div>
+      <div>Total Liabilities: <span id="totalLiabilities">₹0</span></div>
+    </section>
+
+    <form id="entryForm">
+      <label>Date: <input type="date" id="entryDate" required></label>
+      <div id="assetFields">
+        <div class="asset-field"><span class="asset-name">Cash</span>: <input type="number" class="asset" value="0"></div>
+      </div>
+      <button type="button" id="addAsset">+ Add Asset</button>
+
+      <div id="liabilityFields">
+        <div class="liability-field"><span class="liability-name">Credit Card</span>: <input type="number" class="liability" value="0"></div>
+      </div>
+      <button type="button" id="addLiability">+ Add Liability</button>
+
+      <button type="submit">Save Entry</button>
+    </form>
+
+    <h3>History</h3>
+    <table id="historyTable">
+      <thead>
+        <tr><th>Date</th><th>Net Worth</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <canvas id="netWorthChart"></canvas>
   </div>
 
   <script>
@@ -153,27 +192,16 @@
 
     const appContainer = document.getElementById('appContainer');
     const loginContainer = document.getElementById('loginContainer');
-    const userAvatar = document.getElementById('userAvatar');
-    const userName = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const emailLoginForm = document.getElementById('emailLoginForm');
     const entryForm = document.getElementById('entryForm');
-    const assetFields = document.getElementById('assetFields');
-    const liabilityFields = document.getElementById('liabilityFields');
     const addAssetBtn = document.getElementById('addAsset');
     const addLiabilityBtn = document.getElementById('addLiability');
-    const currentNetWorthDisplay = document.getElementById('currentNetWorth');
-    const totalAssetsDisplay = document.getElementById('totalAssets');
-    const totalLiabilitiesDisplay = document.getElementById('totalLiabilities');
-    const historyTable = document.querySelector('#historyTable tbody');
-    const detailsModal = document.getElementById('detailsModal');
-    const closeModalBtn = document.getElementById('closeModal');
-
-    const emailLoginForm = document.getElementById('emailLoginForm');
 
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
         showApp();
-        updateUserInfo(user);
         listenForEntries();
       } else {
         currentUser = null;
@@ -187,17 +215,10 @@
     }
 
     function showLogin() {
-      appContainer.style.display = 'flex';
+      appContainer.style.display = 'none';
       loginContainer.style.display = 'flex';
     }
 
-    function updateUserInfo(user) {
-      if (user.email && !user.displayName) {
-        console.log("Logged in as:", user.email);
-      }
-    }
-
-    // Email login only
     emailLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('emailInput').value;
@@ -207,6 +228,124 @@
       } catch (error) {
         alert("Login failed: " + error.message);
       }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        entries = [];
+        if (netWorthChart) {
+          netWorthChart.destroy();
+          netWorthChart = null;
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    });
+
+    function listenForEntries() {
+      if (!currentUser) return;
+      const ref = db.ref(`users/${currentUser.uid}/entries`);
+      ref.off();
+      ref.on('value', snapshot => {
+        if (snapshot.exists()) {
+          entries = [];
+          snapshot.forEach(child => {
+            entries.push({ id: child.key, ...child.val() });
+          });
+        } else {
+          entries = [];
+        }
+        updateDashboard();
+        renderHistoryTable();
+        renderChart();
+      });
+    }
+
+    async function saveEntry(entry) {
+      if (!currentUser) return;
+      try {
+        const ref = await db.ref(`users/${currentUser.uid}/entries`).push(entry);
+        entry.id = ref.key;
+      } catch (error) {
+        console.error('Error saving entry:', error);
+      }
+    }
+
+    async function deleteEntry(id) {
+      if (!currentUser) return;
+      if (confirm('Delete entry?')) {
+        await db.ref(`users/${currentUser.uid}/entries/${id}`).remove();
+      }
+    }
+
+    function updateDashboard() {
+      const netWorth = entries.length ? entries[entries.length - 1].netWorth : 0;
+      const totalAssets = entries.length ? entries[entries.length - 1].totalAssets : 0;
+      const totalLiabilities = entries.length ? entries[entries.length - 1].totalLiabilities : 0;
+      document.getElementById('currentNetWorth').textContent = `₹${netWorth}`;
+      document.getElementById('totalAssets').textContent = `₹${totalAssets}`;
+      document.getElementById('totalLiabilities').textContent = `₹${totalLiabilities}`;
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = '';
+      entries.forEach(entry => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${entry.date}</td><td>₹${entry.netWorth}</td><td><button onclick="deleteEntry('${entry.id}')">Delete</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('netWorthChart').getContext('2d');
+      if (netWorthChart) netWorthChart.destroy();
+      netWorthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: entries.map(e => e.date),
+          datasets: [{
+            label: 'Net Worth',
+            data: entries.map(e => e.netWorth),
+            borderColor: '#3a0ca3',
+            fill: false
+          }]
+        }
+      });
+    }
+
+    entryForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const date = document.getElementById('entryDate').value;
+      const assets = {};
+      document.querySelectorAll('.asset').forEach((input, i) => {
+        assets[`Asset${i+1}`] = parseFloat(input.value) || 0;
+      });
+      const liabilities = {};
+      document.querySelectorAll('.liability').forEach((input, i) => {
+        liabilities[`Liability${i+1}`] = parseFloat(input.value) || 0;
+      });
+      const totalAssets = Object.values(assets).reduce((a,b) => a+b, 0);
+      const totalLiabilities = Object.values(liabilities).reduce((a,b) => a+b, 0);
+      const netWorth = totalAssets - totalLiabilities;
+      const newEntry = { date, assets, liabilities, totalAssets, totalLiabilities, netWorth };
+      saveEntry(newEntry);
+      entryForm.reset();
+    });
+
+    addAssetBtn.addEventListener('click', () => {
+      const div = document.createElement('div');
+      div.classList.add('asset-field');
+      div.innerHTML = `Asset: <input type="number" class="asset" value="0">`;
+      document.getElementById('assetFields').appendChild(div);
+    });
+
+    addLiabilityBtn.addEventListener('click', () => {
+      const div = document.createElement('div');
+      div.classList.add('liability-field');
+      div.innerHTML = `Liability: <input type="number" class="liability" value="0">`;
+      document.getElementById('liabilityFields').appendChild(div);
     });
   </script>
 </body>
