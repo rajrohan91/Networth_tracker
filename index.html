@@ -10,8 +10,727 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Add your existing CSS styles here (no changes needed in the CSS part) */
-    /* Keeping the styles intact for brevity */
+    /* Force consistent font styles across browsers */
+    input, button {
+      font-family: inherit;
+      font-size: 100%;
+    }
+
+    :root {
+      --primary: #4361ee;
+      --secondary: #3a0ca3;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --dark: #1d3557;
+      --light: #f8f9fa;
+      --asset: #2ecc71;
+      --liability: #e74c3c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      border-radius: 15px;
+      color: white;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex; /* Added flexbox for consistent layout */
+      flex-direction: column; /* Stack elements vertically */
+      align-items: center; /* Center items horizontally */
+    }
+    
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      transform: rotate(30deg);
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .tagline {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* User info and logout styles */
+    .user-info {
+      position: absolute; /* Kept absolute for desktop layout */
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 3;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .user-name {
+      color: white;
+      font-weight: 500;
+      display: block; /* Always show user name */
+    }
+
+    .logout-btn {
+      background: rgba(255,255,255,0.2) !important;
+      color: white !important;
+      border: 1px solid rgba(255,255,255,0.3) !important;
+      padding: 8px 16px !important;
+      border-radius: 20px !important;
+      font-size: 0.9rem !important;
+      transition: all 0.3s ease !important;
+      box-shadow: none !important;
+      z-index: 10; /* Ensure button is on top */
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Login screen styles */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+    }
+
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-title {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .login-subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .google-login-btn {
+      background: #4285f4 !important;
+      color: white !important;
+      border: none !important;
+      padding: 12px 24px !important;
+      border-radius: 8px !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      width: 100%;
+      transition: all 0.3s ease !important;
+      box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3) !important;
+    }
+
+    .google-login-btn:hover {
+      background: #3367d6 !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 15px rgba(66, 133, 244, 0.4) !important;
+    }
+
+    .google-icon {
+      background: white;
+      padding: 4px;
+      border-radius: 2px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 25px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      color: var(--dark);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-title i {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    button {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    button.delete {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+    }
+    
+    button.delete:hover {
+      box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 8px 0 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .net-worth-display {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 15px 0;
+      color: var(--asset);
+      text-align: center;
+      background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(46, 204, 113, 0.05));
+      padding: 15px;
+      border-radius: 12px;
+    }
+    
+    .positive {
+      color: var(--asset);
+    }
+    
+    .negative {
+      color: var(--liability);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    th {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      text-align: left;
+      padding: 15px;
+      font-weight: 600;
+    }
+    
+    th:first-child {
+      border-top-left-radius: 10px;
+    }
+    
+    th:last-child {
+      border-top-right-radius: 10px;
+    }
+    
+    td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      background: white;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:last-child td:first-child {
+      border-bottom-left-radius: 10px;
+    }
+    
+    tr:last-child td:last-child {
+      border-bottom-right-radius: 10px;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 320px;
+      margin-top: 20px;
+    }
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .summary-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: var(--dark);
+    }
+    
+    .summary-card div {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    
+    .asset-field, .liability-field {
+      position: relative;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.02);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .asset-field {
+      background: rgba(46, 204, 113, 0.05);
+      border-left: 4px solid var(--asset);
+    }
+    
+    .liability-field {
+      background: rgba(231, 76, 60, 0.05);
+      border-left: 4px solid var(--liability);
+    }
+    
+    .edit-name {
+      color: var(--primary);
+      cursor: pointer;
+      margin-left: 10px;
+      font-size: 0.9em;
+      transition: all 0.3s;
+    }
+    
+    .edit-name:hover {
+      color: var(--secondary);
+      transform: scale(1.1);
+    }
+    
+    .name-input {
+      display: none;
+      width: 65%;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    
+    .form-section {
+      margin-bottom: 25px;
+    }
+    
+    .form-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      color: var(--dark);
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #eee;
+    }
+    
+    .form-section h3 i {
+      background: var(--asset);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .liability-section h3 i {
+      background: var(--liability);
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 40px 20px;
+      color: #777;
+    }
+    
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+    
+    .delete-field {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--liability);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .delete-field:hover {
+      background: rgba(231, 76, 60, 0.2);
+      transform: scale(1.1);
+    }
+    
+    .asset-name, .liability-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .asset-name {
+      color: var(--asset);
+    }
+    
+    .liability-name {
+      color: var(--liability);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      transform: translateY(30px);
+      transition: transform 0.4s ease;
+    }
+    
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: 20px 25px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      color: white;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .modal-header h2 i {
+      background: rgba(255, 255, 255, 0.2);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    
+    .close-modal:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .modal-body {
+      padding: 25px;
+    }
+    
+    .modal-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .modal-summary-item {
+      background: #f9f9ff;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+    
+    .modal-summary-item h3 {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    
+    .modal-summary-item div {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .modal-assets, .modal-liabilities {
+      margin-bottom: 25px;
+    }
+    
+    .modal-section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      color: var(--dark);
+      font-size: 1.2rem;
+    }
+    
+    .modal-section-title i {
+      background: var(--asset);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .modal-liabilities .modal-section-title i {
+      background: var(--liability);
+    }
+    
+    .modal-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 15px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--asset);
+    }
+    
+    .modal-liabilities .modal-item {
+      border-left: 4px solid var(--liability);
+    }
+    
+    .modal-item-name {
+      font-weight: 600;
+    }
+    
+    .modal-item-value {
+      font-weight: 600;
+    }
+    
+    .modal-assets .modal-item-value {
+      color: var(--asset);
+    }
+    
+    .modal-liabilities .modal-item-value {
+      color: var(--liability);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .summary-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .modal {
+        width: 95%;
+      }
+      
+      .modal-summary {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+      }
+
+      /* Adjust user info for smaller screens */
+      .user-info {
+        position: static; /* Stack naturally within the flex container */
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      .user-name {
+        display: block;
+        font-size: 0.8rem;
+      }
+
+      /* Adjust padding for form and cards */
+      .card, .login-card {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -144,28 +863,26 @@
     </div>
   </div>
 
-  <div class="login-container" id="loginContainer">
-    <div class="login-card">
-      <h1 class="login-title">
-        <i class="fas fa-chart-line" style="color: var(--primary); margin-right: 10px;"></i>
-        Welcome Back
-      </h1>
-      <p class="login-subtitle">Sign in to access your Net Worth Tracker</p>
-      <button class="google-login-btn" id="loginBtn">
-        <div class="google-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
-            <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.04a4.8 4.8 0 0 1-7.18-2.53H1.83v2.07A8 8 0 0 0 8.98 17z"/>
-            <path fill="#FBBC05" d="M4.5 10.49a4.8 4.8 0 0 1 0-3.07V5.35H1.83a8 8 0 0 0 0 7.28l2.67-2.14z"/>
-            <path fill="#EA4335" d="M8.98 4.72c1.16 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.35L4.5 7.42c.45-1.33 1.7-2.7 4.48-2.7z"/>
-          </svg>
-        </div>
-        Continue with Google
-      </button>
-    </div>
-  </div>
   
-  <div class="modal-overlay" id="detailsModal">
+<div class="login-container" id="loginContainer">
+  <div class="login-card">
+    <h1 class="login-title">
+      <i class="fas fa-chart-line" style="color: var(--primary); margin-right: 10px;"></i>
+      Welcome Back
+    </h1>
+    <p class="login-subtitle">Sign in with your email and password</p>
+
+    <input type="email" id="emailInput" placeholder="Email" required>
+    <input type="password" id="passwordInput" placeholder="Password" required>
+
+    <button class="google-login-btn" id="loginBtn">
+      <i class="fas fa-sign-in-alt"></i> Login
+    </button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailsModal"
+ id="detailsModal">
     <div class="modal">
       <div class="modal-header">
         <h2><i class="fas fa-file-invoice-dollar"></i> Financial Snapshot</h2>
@@ -298,16 +1015,17 @@
       }
     }
 
-    // Login with Google
-    loginBtn.addEventListener('click', async () => {
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-      } catch (error) {
-        console.error('Login error:', error);
-        alert('Login failed. Please try again.');
-      }
-    });
+    // Login with Email & Password
+loginBtn.addEventListener('click', async () => {
+  const email = document.getElementById('emailInput').value;
+  const password = document.getElementById('passwordInput').value;
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    console.error('Login error:', error);
+    alert(error.message);
+  }
+});
 
     // Logout
     logoutBtn.addEventListener('click', async () => {
@@ -472,42 +1190,60 @@
     }
 
     // Add new asset field
-    function addAssetField() {
-      const newField = document.createElement('div');
-      newField.className = 'asset-field';
-      newField.innerHTML = `
-        <span class="asset-name">New Asset</span>
-        <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
-        <input type="text" class="name-input" value="New Asset">
-        <input type="number" class="asset" placeholder="Amount" value="0">
-        <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
-      `;
-      assetFields.appendChild(newField);
-      
-      // Add event listener to delete button
-      newField.querySelector('.delete-field').addEventListener('click', function() {
-        this.parentElement.remove();
-      });
-    }
+    
+function addAssetField() {
+  const newField = document.createElement('div');
+  newField.className = 'asset-field';
+  newField.innerHTML = `
+    <span class="asset-name">New Asset</span>
+    <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
+    <input type="text" class="name-input" value="New Asset">
+    <input type="number" class="asset" placeholder="Amount" value="0">
+    <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
+  `;
+  assetFields.appendChild(newField);
+
+  // delete button
+  newField.querySelector('.delete-field').addEventListener('click', function() {
+    this.parentElement.remove();
+  });
+
+  // keep span in sync if input changes
+  const nameInput = newField.querySelector('.name-input');
+  const nameSpan = newField.querySelector('.asset-name');
+  nameInput.addEventListener('input', () => {
+    nameSpan.textContent = nameInput.value;
+  });
+}
+
 
     // Add new liability field
-    function addLiabilityField() {
-      const newField = document.createElement('div');
-      newField.className = 'liability-field';
-      newField.innerHTML = `
-        <span class="liability-name">New Liability</span>
-        <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
-        <input type="text" class="name-input" value="New Liability">
-        <input type="number" class="liability" placeholder="Amount" value="0">
-        <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
-      `;
-      liabilityFields.appendChild(newField);
-      
-      // Add event listener to delete button
-      newField.querySelector('.delete-field').addEventListener('click', function() {
-        this.parentElement.remove();
-      });
-    }
+    
+function addLiabilityField() {
+  const newField = document.createElement('div');
+  newField.className = 'liability-field';
+  newField.innerHTML = `
+    <span class="liability-name">New Liability</span>
+    <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
+    <input type="text" class="name-input" value="New Liability">
+    <input type="number" class="liability" placeholder="Amount" value="0">
+    <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
+  `;
+  liabilityFields.appendChild(newField);
+
+  // delete button
+  newField.querySelector('.delete-field').addEventListener('click', function() {
+    this.parentElement.remove();
+  });
+
+  // keep span in sync if input changes
+  const nameInput = newField.querySelector('.name-input');
+  const nameSpan = newField.querySelector('.liability-name');
+  nameInput.addEventListener('input', () => {
+    nameSpan.textContent = nameInput.value;
+  });
+}
+
 
     // Update dashboard summary
     function updateDashboard() {
