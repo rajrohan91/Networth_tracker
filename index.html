@@ -102,11 +102,6 @@
     /* Hide the app until login */
     #appContainer {
       display: none;
-      padding: 20px;
-      background: #f4f6f9;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
     }
   </style>
 </head>
@@ -133,41 +128,59 @@
 
   <!-- Main App (hidden until login) -->
   <div id="appContainer">
+    <!-- RESTORED ORIGINAL TRACKER DASHBOARD -->
     <header>
-      <h2>Net Worth Tracker</h2>
+      <div class="user-info">
+        <img id="userAvatar" src="" alt="User Avatar">
+        <span id="userName"></span>
+      </div>
       <button id="logoutBtn">Logout</button>
     </header>
 
-    <section id="summary">
-      <div>Net Worth: <span id="currentNetWorth">₹0</span></div>
-      <div>Total Assets: <span id="totalAssets">₹0</span></div>
-      <div>Total Liabilities: <span id="totalLiabilities">₹0</span></div>
+    <section class="summary">
+      <div class="card">
+        <h3>Net Worth</h3>
+        <p id="currentNetWorth">₹0</p>
+      </div>
+      <div class="card">
+        <h3>Total Assets</h3>
+        <p id="totalAssets">₹0</p>
+      </div>
+      <div class="card">
+        <h3>Total Liabilities</h3>
+        <p id="totalLiabilities">₹0</p>
+      </div>
     </section>
 
-    <form id="entryForm">
-      <label>Date: <input type="date" id="entryDate" required></label>
-      <div id="assetFields">
-        <div class="asset-field"><span class="asset-name">Cash</span>: <input type="number" class="asset" value="0"></div>
-      </div>
-      <button type="button" id="addAsset">+ Add Asset</button>
+    <section class="form-section">
+      <h3>Add New Entry</h3>
+      <form id="entryForm">
+        <label>Date: <input type="date" id="entryDate" required></label>
+        <div id="assetFields"></div>
+        <button type="button" id="addAsset">+ Add Asset</button>
+        <div id="liabilityFields"></div>
+        <button type="button" id="addLiability">+ Add Liability</button>
+        <button type="submit">Save Entry</button>
+      </form>
+    </section>
 
-      <div id="liabilityFields">
-        <div class="liability-field"><span class="liability-name">Credit Card</span>: <input type="number" class="liability" value="0"></div>
-      </div>
-      <button type="button" id="addLiability">+ Add Liability</button>
+    <section class="history">
+      <h3>History</h3>
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Net Worth</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-      <button type="submit">Save Entry</button>
-    </form>
-
-    <h3>History</h3>
-    <table id="historyTable">
-      <thead>
-        <tr><th>Date</th><th>Net Worth</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <canvas id="netWorthChart"></canvas>
+    <section class="chart-section">
+      <canvas id="netWorthChart"></canvas>
+    </section>
   </div>
 
   <script>
@@ -194,9 +207,6 @@
     const loginContainer = document.getElementById('loginContainer');
     const logoutBtn = document.getElementById('logoutBtn');
     const emailLoginForm = document.getElementById('emailLoginForm');
-    const entryForm = document.getElementById('entryForm');
-    const addAssetBtn = document.getElementById('addAsset');
-    const addLiabilityBtn = document.getElementById('addLiability');
 
     auth.onAuthStateChanged(user => {
       if (user) {
@@ -314,6 +324,10 @@
         }
       });
     }
+
+    const entryForm = document.getElementById('entryForm');
+    const addAssetBtn = document.getElementById('addAsset');
+    const addLiabilityBtn = document.getElementById('addLiability');
 
     entryForm.addEventListener('submit', (e) => {
       e.preventDefault();
