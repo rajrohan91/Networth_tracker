@@ -764,21 +764,21 @@
                 <span class="asset-name">Cash</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Cash">
-                <input type="number" class="asset" placeholder="Amount" value="0">
+                <input type="number" class="asset" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
               <div class="asset-field">
                 <span class="asset-name">Investments</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Investments">
-                <input type="number" class="asset" placeholder="Amount" value="0">
+                <input type="number" class="asset" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
               <div class="asset-field">
                 <span class="asset-name">Real Estate</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Real Estate">
-                <input type="number" class="asset" placeholder="Amount" value="0">
+                <input type="number" class="asset" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
             </div>
@@ -792,21 +792,21 @@
                 <span class="liability-name">Credit Cards</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Credit Cards">
-                <input type="number" class="liability" placeholder="Amount" value="0">
+                <input type="number" class="liability" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
               <div class="liability-field">
                 <span class="liability-name">Loans</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Loans">
-                <input type="number" class="liability" placeholder="Amount" value="0">
+                <input type="number" class="liability" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
               <div class="liability-field">
                 <span class="liability-name">Mortgage</span>
                 <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
                 <input type="text" class="name-input" value="Mortgage">
-                <input type="number" class="liability" placeholder="Amount" value="0">
+                <input type="number" class="liability" placeholder="Amount">
                 <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
               </div>
             </div>
@@ -1073,7 +1073,7 @@ loginBtn.addEventListener('click', async () => {
           entriesObject[entry.id] = entry;
         });
         
-        await db.ref(`users/${currentUser.uid}/entries`).set(entriesObject);
+        await db.ref(`users/${currentUser.uid}/entries`).update(entriesObject);
       } catch (error) {
         console.error('Error saving entries:', error);
         alert('Failed to save data. Please try again.');
@@ -1198,7 +1198,7 @@ function addAssetField() {
     <span class="asset-name">New Asset</span>
     <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
     <input type="text" class="name-input" value="New Asset">
-    <input type="number" class="asset" placeholder="Amount" value="0">
+    <input type="number" class="asset" placeholder="Amount">
     <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
   `;
   assetFields.appendChild(newField);
@@ -1226,7 +1226,7 @@ function addLiabilityField() {
     <span class="liability-name">New Liability</span>
     <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
     <input type="text" class="name-input" value="New Liability">
-    <input type="number" class="liability" placeholder="Amount" value="0">
+    <input type="number" class="liability" placeholder="Amount">
     <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
   `;
   liabilityFields.appendChild(newField);
