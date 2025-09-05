@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Net Worth Tracker (₹)</title>
+  <title>NetWorth Tracker (₹)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -787,6 +787,38 @@
     height: 25px;
   }
 }
+/* Collapsible sections on mobile */
+@media (max-width: 600px) {
+  .form-section {
+    display: none;
+  }
+  .form-section.active {
+    display: block;
+  }
+
+  #mobile-sections {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-top: 2px solid #ddd;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 2000;
+  }
+
+  #mobile-sections button.toggle {
+    width: 100%;
+    padding: 12px;
+    font-weight: 600;
+    border: none;
+    border-top: 1px solid #eee;
+    background: var(--primary);
+    color: white;
+    border-radius: 0;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -799,7 +831,7 @@
           <span>Logout</span>
         </button>
       </div>
-      <h1><i class="fas fa-chart-line"></i> Premium Net Worth Tracker</h1>
+      <h1><i class="fas fa-chart-line"></i> NetWorth Tracker</h1>
       <p class="tagline">Track your financial progress in style with ₹</p>
     </header>
     
@@ -1552,6 +1584,35 @@ function addLiabilityField() {
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
       return new Date(dateString).toLocaleDateString('en-US', options);
     }
+    function toggleSection(id) {
+  document.querySelectorAll('#mobile-sections .form-section')
+    .forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Move assets/liabilities into mobile container on small screens
+function moveSections() {
+  if (window.innerWidth <= 600) {
+    document.getElementById('assetSection').appendChild(document.getElementById('assetFields').parentElement);
+    document.getElementById('liabilitySection').appendChild(document.getElementById('liabilityFields').parentElement);
+  }
+}
+
+window.addEventListener('resize', moveSections);
+document.addEventListener('DOMContentLoaded', moveSections);
+
   </script>
+  <div id="mobile-sections" class="mobile-only">
+  <button class="toggle" onclick="toggleSection('assetSection')">
+    Assets
+  </button>
+  <div id="assetSection" class="form-section"></div>
+
+  <button class="toggle" onclick="toggleSection('liabilitySection')">
+    Liabilities
+  </button>
+  <div id="liabilitySection" class="form-section"></div>
+</div>
+  
 </body>
 </html>
