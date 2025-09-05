@@ -1015,19 +1015,37 @@ loginBtn.addEventListener('click', async () => {
 
     // Logout
     logoutBtn.addEventListener('click', async () => {
-      try {
-        await auth.signOut();
-        // Clear local data
-        entries = [];
-        if (netWorthChart) {
-          netWorthChart.destroy();
-          netWorthChart = null;
-        }
-      } catch (error) {
-        console.error('Logout error:', error);
-        alert('Logout failed. Please try again.');
-      }
-    });
+  try {
+    if (currentUser && entries.length > 0) {
+      // Save only the entries currently in memory (shown in Financial History)
+      const entriesObject = {};
+      entries.forEach(entry => {
+        entriesObject[entry.id] = entry;
+      });
+
+      // Overwrite Firebase with ONLY these entries
+      await db.ref(`users/${currentUser.uid}/entries`).set(entriesObject);
+    } else if (currentUser) {
+      // If no entries, clear everything in Firebase
+      await db.ref(`users/${currentUser.uid}/entries`).remove();
+    }
+
+    // Now sign out
+    await auth.signOut();
+
+    // Clear local data
+    entries = [];
+    if (netWorthChart) {
+      netWorthChart.destroy();
+      netWorthChart = null;
+    }
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    alert('Logout failed. Please try again.');
+  }
+});
+
 
     // Load entries from Firebase
     async function loadEntries() {
