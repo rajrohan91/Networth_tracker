@@ -99,13 +99,6 @@
       z-index: 3;
     }
 
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.3);
-    }
-
     .user-name {
       color: white;
       font-weight: 500;
@@ -737,7 +730,6 @@
   <div class="container" id="appContainer" style="display: none;">
     <header>
       <div class="user-info" id="userInfo">
-        <img class="user-avatar" id="userAvatar" src="" alt="User Avatar">
         <span class="user-name" id="userName"></span>
         <button class="logout-btn" id="logoutBtn">
           <i class="fas fa-sign-out-alt"></i>
@@ -957,7 +949,6 @@
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const userInfo = document.getElementById('userInfo');
-    const userAvatar = document.getElementById('userAvatar');
     const userName = document.getElementById('userName');
     
     const entryForm = document.getElementById('entryForm');
@@ -1005,11 +996,6 @@
 
     // Update user info in header
     function updateUserInfo(user) {
-      if (user.photoURL) {
-        userAvatar.src = user.photoURL;
-        userAvatar.alt = user.displayName || 'User';
-      }
-      
       if (user.displayName) {
         userName.textContent = user.displayName;
       }
