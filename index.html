@@ -1044,6 +1044,9 @@
 
     // Global variables
     let entries = [];
+let savedAssetNames = [];
+let savedLiabilityNames = [];
+
     let netWorthChart = null;
     let currentUser = null;
 
@@ -1154,17 +1157,26 @@ loginBtn.addEventListener('click', async () => {
     // Load entries from Firebase
     async function loadEntries() {
       if (!currentUser) return;
-      
+
       try {
-        const snapshot = await db.ref(`users/${currentUser.uid}/entries`).get();
+        const snapshot = await db.ref(`users/${currentUser.uid}`).get();
+
         if (snapshot.exists()) {
-          entries = Object.values(snapshot.val()) || [];
+          const data = snapshot.val();
+          entries = data.entries ? Object.values(data.entries) : [];
+          savedAssetNames = data.assetNames || ["Cash", "Investments", "Real Estate"];
+          savedLiabilityNames = data.liabilityNames || ["Credit Cards", "Loans", "Mortgage"];
         } else {
           entries = [];
+          savedAssetNames = ["Cash", "Investments", "Real Estate"];
+          savedLiabilityNames = ["Credit Cards", "Loans", "Mortgage"];
         }
+
+        rebuildFieldsFromSavedNames();
         updateDashboard();
         renderHistoryTable();
         renderChart();
+
       } catch (error) {
         console.error('Error loading entries:', error);
       }
@@ -1289,9 +1301,17 @@ loginBtn.addEventListener('click', async () => {
       updateDashboard();
       renderHistoryTable();
       renderChart();
-      
+
+      // Save only names
+      savedAssetNames = Array.from(document.querySelectorAll('.asset-name')).map(el => el.textContent);
+      savedLiabilityNames = Array.from(document.querySelectorAll('.liability-name')).map(el => el.textContent);
+
+      db.ref(`users/${currentUser.uid}/assetNames`).set(savedAssetNames);
+      db.ref(`users/${currentUser.uid}/liabilityNames`).set(savedLiabilityNames);
+
       // Reset form
       entryForm.reset();
+
       let today = new Date();
       today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
       document.getElementById('entryDate').value = today.toISOString().split('T')[0];
@@ -1582,7 +1602,41 @@ function addLiabilityField() {
       });
     }
 
-    // Helper functions
+    
+function rebuildFieldsFromSavedNames() {
+  assetFields.innerHTML = "";
+  savedAssetNames.forEach(name => {
+    const field = document.createElement("div");
+    field.className = "asset-field";
+    field.innerHTML = `
+      <span class="asset-name">${name}</span>
+      <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
+      <input type="text" class="name-input" value="${name}">
+      <input type="number" class="asset" placeholder="Amount">
+      <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
+    `;
+    assetFields.appendChild(field);
+    field.querySelector('.delete-field').addEventListener('click', () => field.remove());
+  });
+
+  liabilityFields.innerHTML = "";
+  savedLiabilityNames.forEach(name => {
+    const field = document.createElement("div");
+    field.className = "liability-field";
+    field.innerHTML = `
+      <span class="liability-name">${name}</span>
+      <span class="edit-name" onclick="editName(this)"><i class="fas fa-edit"></i></span>
+      <input type="text" class="name-input" value="${name}">
+      <input type="number" class="liability" placeholder="Amount">
+      <button type="button" class="delete-field"><i class="fas fa-times"></i></button>
+    `;
+    liabilityFields.appendChild(field);
+    field.querySelector('.delete-field').addEventListener('click', () => field.remove());
+  });
+}
+
+
+// Helper functions
     function formatCurrency(amount) {
       return '₹' + amount.toLocaleString('en-IN', {
         maximumFractionDigits: 0
