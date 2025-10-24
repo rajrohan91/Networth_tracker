@@ -1261,22 +1261,24 @@ loginBtn.addEventListener('click', async () => {
       
       const date = document.getElementById('entryDate').value;
       
-      // Get assets
+      // Get assets (SAFE)
       const assets = {};
       document.querySelectorAll('.asset-field').forEach(field => {
-        const name = field.querySelector('.asset-name').textContent;
-        const value = parseFloat(field.querySelector('.asset').value) || 0;
-        assets[name] = value;
+  	const originalName = field.querySelector('.asset-name').textContent;
+  	const safeName = originalName.replace(/[.#$\\[\\]]/g, "_"); // <--- FIX
+  	const value = parseFloat(field.querySelector('.asset').value) || 0;
+  	assets[safeName] = value;
       });
-      
-      // Get liabilities
-      const liabilities = {};
-      document.querySelectorAll('.liability-field').forEach(field => {
-        const name = field.querySelector('.liability-name').textContent;
-        const value = parseFloat(field.querySelector('.liability').value) || 0;
-        liabilities[name] = value;
-      });
-      
+
+     // Get liabilities (SAFE)
+     const liabilities = {};
+     document.querySelectorAll('.liability-field').forEach(field => {
+       const originalName = field.querySelector('.liability-name').textContent;
+       const safeName = originalName.replace(/[.#$\\[\\]]/g, "_"); // <--- FIX
+       const value = parseFloat(field.querySelector('.liability').value) || 0;
+       liabilities[safeName] = value;
+     });
+
       // Calculate net worth
       const totalAssets = Object.values(assets).reduce((sum, val) => sum + val, 0);
       const totalLiabilities = Object.values(liabilities).reduce((sum, val) => sum + val, 0);
