@@ -1164,6 +1164,17 @@ loginBtn.addEventListener('click', async () => {
         if (snapshot.exists()) {
           const data = snapshot.val();
           entries = data.entries ? Object.values(data.entries) : [];
+          // Convert legacy object assets/liabilities to array form
+          entries = entries.map(e => {
+            if (e.assets && !Array.isArray(e.assets)) {
+              e.assets = Object.entries(e.assets).map(([name,value])=>({name,value}));
+            }
+            if (e.liabilities && !Array.isArray(e.liabilities)) {
+              e.liabilities = Object.entries(e.liabilities).map(([name,value])=>({name,value}));
+            }
+            return e;
+          });
+
           savedAssetNames = data.assetNames || ["Cash", "Investments", "Real Estate"];
           savedLiabilityNames = data.liabilityNames || ["Credit Cards", "Loans", "Mortgage"];
         } else {
@@ -1288,8 +1299,8 @@ loginBtn.addEventListener('click', async () => {
       const newEntry = {
         id: Date.now(),
         date,
-        assets,
-        liabilities,
+        assets: Object.entries(assets).map(([name, value]) => ({ name, value })),
+        liabilities: Object.entries(liabilities).map(([name, value]) => ({ name, value })),
         netWorth,
         totalAssets,
         totalLiabilities
@@ -1450,27 +1461,27 @@ function addLiabilityField() {
       modalLiabilitiesList.innerHTML = '';
       
       // Populate assets
-      for (const [name, value] of Object.entries(entry.assets)) {
+      entry.assets.forEach(item => {
         const assetItem = document.createElement('div');
         assetItem.className = 'modal-item';
         assetItem.innerHTML = `
-          <span class="modal-item-name">${name}</span>
-          <span class="modal-item-value">${formatCurrency(value)}</span>
+          <span class="modal-item-name">${item.name}</span>
+          <span class="modal-item-value">${formatCurrency(item.value)}</span>
         `;
         modalAssetsList.appendChild(assetItem);
-      }
-      
+      });
+
       // Populate liabilities
-      for (const [name, value] of Object.entries(entry.liabilities)) {
+      entry.liabilities.forEach(item => {
         const liabilityItem = document.createElement('div');
         liabilityItem.className = 'modal-item';
         liabilityItem.innerHTML = `
-          <span class="modal-item-name">${name}</span>
-          <span class="modal-item-value">${formatCurrency(value)}</span>
+          <span class="modal-item-name">${item.name}</span>
+          <span class="modal-item-value">${formatCurrency(item.value)}</span>
         `;
         modalLiabilitiesList.appendChild(liabilityItem);
-      }
-      
+      });
+
       // Show modal
       detailsModal.classList.add('active');
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
